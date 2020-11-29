@@ -2,6 +2,7 @@ use dotenv::dotenv;
 use mobc::{Connection, Pool};
 use mobc_postgres::{tokio_postgres, PgConnectionManager};
 use std::convert::Infallible;
+use std::env;
 use tokio_postgres::NoTls;
 use warp::{Filter, Rejection};
 
@@ -62,12 +63,11 @@ async fn main() {
         .recover(error::handle_rejection);
 
     // let host = env::var("HOST").expect("Please set host in .env");
-    // let port = env::var("PORT")
-    //     .expect("Please set port in .env")
-    //     .parse::<i32>()
-    // .unwrap();
-    // port.parse::<i32>().unwrap();
-    warp::serve(routes).run(([0, 0, 0, 0], 5000)).await;
+    let port = env::var("PORT")
+        .expect("Port should be set")
+        .parse::<u16>()
+        .unwrap();
+    warp::serve(routes).run(([0, 0, 0, 0], port)).await;
     // warp::serve(routes).run(([127, 0, 0, 1], port)).await;
 }
 
