@@ -4,12 +4,17 @@ use mobc_postgres::{tokio_postgres, PgConnectionManager};
 use std::convert::Infallible;
 use std::env;
 use tokio_postgres::NoTls;
+// use handlers::expense_handler;
+
 use warp::{Filter, Rejection};
 
 mod data;
 mod db;
 mod error;
 mod handler;
+mod handlers;
+mod model;
+mod service;
 
 type Result<T> = std::result::Result<T, Rejection>;
 type DBCon = Connection<PgConnectionManager<NoTls>>;
@@ -57,8 +62,32 @@ async fn main() {
             .and(with_db(db_pool.clone()))
             .and_then(handler::delete_todo_handler));
 
+    let expense = warp::path("expense");
+    let expense_routes = expense
+        .and(warp::get())
+        .and(warp::query())
+        .and(with_db(db_pool.clone()))
+        .and_then(handlers::expense_handler::list_expense_handler)
+        .or(expense
+            .and(warp::post())
+            .and(warp::body::json())
+            .and(with_db(db_pool.clone()))
+            .and_then(handlers::expense_handler::create_expense_handler))
+        .or(expense
+            .and(warp::put())
+            .and(warp::path::param())
+            .and(warp::body::json())
+            .and(with_db(db_pool.clone()))
+            .and_then(handlers::expense_handler::update_expense_handler))
+        .or(expense
+            .and(warp::delete())
+            .and(warp::path::param())
+            .and(with_db(db_pool.clone()))
+            .and_then(handlers::expense_handler::delete_expense_handler));
+
     let routes = health_route
         .or(todo_routes)
+        .or(expense_routes)
         .with(warp::cors().allow_any_origin())
         .recover(error::handle_rejection);
 
