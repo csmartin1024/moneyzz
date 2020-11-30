@@ -2,6 +2,7 @@ use chrono::prelude::*;
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Expense {
     pub id: i32,
     pub account_id: i32,
@@ -13,6 +14,7 @@ pub struct Expense {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ExpenseRequest {
     pub account_id: i32,
     pub amount: i64,
@@ -22,6 +24,7 @@ pub struct ExpenseRequest {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ExpenseUpdateRequest {
     pub account_id: i32,
     pub amount: i64,
@@ -31,6 +34,7 @@ pub struct ExpenseUpdateRequest {
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ExpenseResponse {
     pub id: i32,
     pub account_id: i32,
