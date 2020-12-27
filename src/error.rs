@@ -54,6 +54,8 @@ pub async fn handle_rejection(err: Rejection) -> std::result::Result<impl Reply,
         message = "Internal Server Error";
     }
 
+    eprintln!("unhandled application error: {:?}", err);
+
     let json = warp::reply::json(&ErrorResponse {
         message: message.into(),
     });

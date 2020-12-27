@@ -85,9 +85,33 @@ async fn main() {
             .and(with_db(db_pool.clone()))
             .and_then(handlers::expense_handler::delete_expense_handler));
 
+    let account = warp::path("account");
+    let account_routes = account
+        .and(warp::get())
+        .and(warp::query())
+        .and(with_db(db_pool.clone()))
+        .and_then(handlers::account_handler::list_account_handler)
+        .or(account
+            .and(warp::post())
+            .and(warp::body::json())
+            .and(with_db(db_pool.clone()))
+            .and_then(handlers::account_handler::create_account_handler))
+        .or(account
+            .and(warp::put())
+            .and(warp::path::param())
+            .and(warp::body::json())
+            .and(with_db(db_pool.clone()))
+            .and_then(handlers::account_handler::update_account_handler))
+        .or(account
+            .and(warp::delete())
+            .and(warp::path::param())
+            .and(with_db(db_pool.clone()))
+            .and_then(handlers::account_handler::delete_account_handler));
+
     let routes = health_route
         .or(todo_routes)
         .or(expense_routes)
+        .or(account_routes)
         .with(warp::cors().allow_any_origin())
         .recover(error::handle_rejection);
 

@@ -23,3 +23,8 @@ CREATE TABLE IF NOT EXISTS expense
     merchant VARCHAR(255) NOT NULL,
     notes VARCHAR(255) NOT NULL DEFAULT ''
 );
+
+INSERT INTO "public"."account"("name") VALUES('Chase Main') RETURNING "id", "name", "created_at";
+INSERT INTO "public"."account"("name") VALUES('Chase Amazon') RETURNING "id", "name", "created_at";
+INSERT INTO "public"."account"("name") VALUES('AMEX') RETURNING "id", "name", "created_at";
+INSERT INTO "public"."account"("name") VALUES('Chase Business') RETURNING "id", "name", "created_at";
