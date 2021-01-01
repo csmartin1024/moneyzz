@@ -14,6 +14,8 @@ const DB_POOL_MAX_OPEN: u64 = 32;
 const DB_POOL_MAX_IDLE: u64 = 8;
 const DB_POOL_TIMEOUT_SECONDS: u64 = 15;
 const TABLE: &str = "expense";
+const LIMIT: &str = "25";
+const OFFSET: &str = "0";
 const SELECT_FIELDS: &str = "id, account_id, amount, category, merchant, notes, created_at";
 
 pub async fn get_db_con(db_pool: &DBPool) -> Result<DBCon> {
@@ -33,24 +35,25 @@ pub fn create_pool() -> std::result::Result<DBPool, mobc::Error<Error>> {
         .build(manager))
 }
 
-pub async fn fetch_expenses(db_pool: &DBPool, search: Option<String>) -> Result<Vec<Expense>> {
+pub async fn fetch_expenses(
+    db_pool: &DBPool,
+    limit_param: Option<String>,
+    offset_param: Option<String>,
+) -> Result<Vec<Expense>> {
     let con = get_db_con(db_pool).await?;
-    // let where_clause = match search {
-    //     Some(_) => "WHERE name like $1",
-    //     None => "",
-    // };
-    // let query = format!(
-    //     "SELECT {} FROM {} {} ORDER BY created_at DESC",
-    //     SELECT_FIELDS, TABLE, where_clause
-    // );
-    let query = format!(
-        "SELECT {} FROM {} ORDER BY created_at DESC",
-        SELECT_FIELDS, TABLE
-    );
-    let q = match search {
-        Some(v) => con.query(query.as_str(), &[&v]).await,
-        None => con.query(query.as_str(), &[]).await,
+    let limit = match limit_param {
+        Some(v) => v,
+        None => LIMIT.to_string(),
     };
+    let offset = match offset_param {
+        Some(v) => v,
+        None => OFFSET.to_string(),
+    };
+    let query = format!(
+        "SELECT {} FROM {} ORDER BY created_at DESC OFFSET {} LIMIT {}",
+        SELECT_FIELDS, TABLE, offset, limit
+    );
+    let q = con.query(query.as_str(), &[]).await;
     let rows = q.map_err(DBQueryError)?;
 
     Ok(rows.iter().map(|r| row_to_expense(&r)).collect())

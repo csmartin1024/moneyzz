@@ -7,10 +7,12 @@ use warp::{http::StatusCode, reject, reply::json, Reply};
 #[derive(Deserialize)]
 pub struct SearchQuery {
     search: Option<String>,
+    limit: Option<String>,
+    offset: Option<String>,
 }
 
 pub async fn list_expense_handler(query: SearchQuery, db_pool: DBPool) -> Result<impl Reply> {
-    let expenses = expense_service::fetch_expenses(&db_pool, query.search)
+    let expenses = expense_service::fetch_expenses(&db_pool, query.limit, query.offset)
         .await
         .map_err(|e| reject::custom(e))?;
     Ok(json::<Vec<_>>(
